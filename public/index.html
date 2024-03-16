@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Partner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        header, footer {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        header {
+            margin-bottom: 20px;
+        }
+
+        footer {
+            margin-top: 20px;
+        }
+
+        #chat-container {
+            width: 80%;
+            max-width: 600px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        #chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            position: relative;
+            padding: 10px 20px;
+            border-radius: 20px;
+            max-width: 75%;
+        }
+
+        .user-message {
+            margin-left: auto;
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .ai-response {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        #chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #e9ecef;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            margin-right: 10px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        #send-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #0056b3;
+        }
+
+        .subheader {
+            font-size: 14px;
+            color: #494949;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Welcome back, Virgin.</h1>
+        <p class="subheader">Please do not engage in sexual conversations as it might get me banned from OpenAI API use.</p>
+    </header>
+
+    <div id="chat-container">
+        <div id="chat-messages"></div>
+        <div id="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 Virtual Partner. All virginities reserved.</p>
+        <p>For more information, ask your mom.</p>
+    </footer>
+
+    <script>
+        // This code runs when the script first loads
+        window.onload = function () {
+            // Reset ai-responses and user-responses on page load
+            localStorage.setItem('ai-responses', []);
+            localStorage.setItem('user-responses', []);
+        };
+
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        function appendMessage(content, isUser = true) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = content;
+            messageElement.classList.add('message');
+            if (isUser) {
+                messageElement.classList.add('user-message');
+            } else {
+                messageElement.classList.add('ai-response');
+            }
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessageToServer(message) {
+            console.log("Sending to server:", message);
+
+            // Send a post request to server on /generate-response which returns a json response value
+            const response = await fetch('/generate-response', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    // aiResponses is an array of strings
+                    aiResponses: JSON.parse(localStorage.getItem('ai-responses') || '[]'),
+                    // userResponses is an array of strings
+                    userResponses: JSON.parse(localStorage.getItem('user-responses') || '[]')
+                })
+            });
+            const data = await response.json();
+            console.log("Response from server:", data);
+            appendMessage(data.response, false);
+            // Add the response from the server to the local storage key "ai-responses" which is an array of strings
+            const aiResponses = JSON.parse(localStorage.getItem('ai-responses') || '[]');
+            aiResponses.push(data.response);
+            localStorage.setItem('ai-responses', JSON.stringify(aiResponses));
+
+            // Add the user message to the local storage key "user-responses" which is an array of strings
+            const userResponses = JSON.parse(localStorage.getItem('user-responses') || '[]');
+            userResponses.push(message);
+            localStorage.setItem('user-responses', JSON.stringify(userResponses));
+        }
+
+        sendButton.addEventListener('click', function () {
+            const message = userInput.value.trim();
+            if (message) {
+                appendMessage(message);
+                sendMessageToServer(message);
+                userInput.value = '';
+            }
+        });
+
+        userInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendButton.click();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
