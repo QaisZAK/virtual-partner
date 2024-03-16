@@ -1,4 +1,4 @@
-[!Preview](https://i.imgur.com/Yt71MBp.png)
+![Preview](https://i.imgur.com/Yt71MBp.png)
 
 How to run:
 1. Clone this repo
