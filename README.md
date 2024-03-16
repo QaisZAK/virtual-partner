@@ -1,3 +1,5 @@
+[!Preview](https://i.imgur.com/Yt71MBp.png)
+
 How to run:
 1. Clone this repo
 2. Run npm i
